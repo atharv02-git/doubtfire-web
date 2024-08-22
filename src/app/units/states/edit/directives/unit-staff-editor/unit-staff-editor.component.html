@@ -1,107 +1,122 @@
 <div class="unit-staff-editor">
   <ng-template #staffAvatar let-match="match">
     <a>
-      <!-- This is where a user icon can go -->
-      <span [innerHTML]="match.label | highlight: query"></span>
+      <span [innerHTML]="match.label | typeaheadHighlight: query"></span>
     </a>
   </ng-template>
-
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h3 class="panel-title">Modify Unit Staff</h3>
-      Add staff members to the unit, assigning them a convenor or tutor role.
-    </div>
-    <div class="panel-body">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Modify Unit Staff</mat-card-title>
+      <mat-card-subtitle
+        >Add staff members to the unit, assigning them a convenor or tutor role.</mat-card-subtitle
+      >
+    </mat-card-header>
+    <mat-card-content>
       <div class="col-sm-12">
-        <div class="callout callout-info" *ngIf="unitStaff.length === 0">
+        <div *ngIf="unitStaff.length === 0" class="callout callout-info">
           This unit has no staff assigned
         </div>
         <div *ngIf="unitStaff.length > 0">
-          <table class="table table-condensed table-hover">
-            <thead>
-              <tr>
-                <th colspan="2">Name</th>
-                <th>Role</th>
-                <th>Main Convenor</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let staff of unitStaff">
-                <td style="width: 30px">
-                  <user-icon [size]="30" [user]="staff.user"></user-icon>
-                </td>
-                <td>{{ staff.user.name }}</td>
-                <td>
-                  <div class="btn-group">
-                    <label
-                      class="btn btn-default"
-                      matTooltip="Tutors deliver unit content."
-                      [ngModel]="staff.role"
-                      (click)="changeRole(staff, 2)"
-                      >Tutor</label
-                    >
-                    <label
-                      class="btn btn-default"
-                      matTooltip="Convenors manage the unit."
-                      [ngModel]="staff.role"
-                      (click)="changeRole(staff, 3)"
-                      >Convenor</label
-                    >
-                  </div>
-                </td>
-                <td>
-                  <button
-                    *ngIf="staff.role === 'Convenor'"
-                    [disabled]="staff.id === unit.mainConvenor.id"
-                    type="button"
-                    class="btn btn-default"
-                    [ngModel]="unit.mainConvenor"
-                    (click)="changeMainConvenor(staff)"
+          <table mat-table [dataSource]="unitStaff" class="mat-elevation-z8">
+            <ng-container matColumnDef="avatar">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let staff">
+                <user-icon [size]="30" [user]="staff.user"></user-icon>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let staff">{{ staff.user.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef>Role</th>
+              <td mat-cell *matCellDef="let staff">
+                <div class="btn-group">
+                  <label
+                    mat-button
+                    [ngClass]="staff.role === 'Tutor' ? 'active' : ''"
+                    (click)="changeRole(staff, 2)"
+                    >Tutor</label
                   >
-                    <i
-                      class="fa"
-                      [ngClass]="{
-                        'fa-check': staff.id === unit.mainConvenor.id,
-                        'fa-times': staff.id !== unit.mainConvenor.id,
-                      }"
-                    ></i>
-                  </button>
-                </td>
-                <td>
-                  <button class="btn btn-danger" (click)="removeStaff(staff)">
-                    <i class="fa fa-trash-o"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
+                  <label
+                    mat-button
+                    [ngClass]="staff.role === 'Convenor' ? 'active' : ''"
+                    (click)="changeRole(staff, 3)"
+                    >Convenor</label
+                  >
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="mainConvenor">
+              <th mat-header-cell *matHeaderCellDef>Main Convenor</th>
+              <td mat-cell *matCellDef="let staff">
+                <button
+                  *ngIf="staff.role === 'Convenor'"
+                  [disabled]="staff.id === unit.mainConvenor.id"
+                  mat-button
+                  (click)="changeMainConvenor(staff)"
+                >
+                  <mat-icon>{{ staff.id === unit.mainConvenor.id ? 'check' : 'clear' }}</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let staff">
+                <button mat-button color="warn" (click)="removeStaff(staff)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['avatar', 'name', 'role', 'mainConvenor', 'actions']"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['avatar', 'name', 'role', 'mainConvenor', 'actions']"
+            ></tr>
           </table>
         </div>
       </div>
-    </div>
-    <div class="panel-footer clearfix">
+    </mat-card-content>
+    <mat-card-footer>
       <div class="input-group col-sm-12">
-        <input
-          class="form-control"
+        <!-- <input
+          matInput
           id="convenors"
           placeholder="Staff Name"
-          ng-Model="selectedStaff"
-          typeahead="staff | filter: $viewValue | filter: filterStaff"
+          [(ngModel)]="selectedStaff"
+          [ngbTypeahead]="searchStaff"
           autocomplete="off"
-          typeaheadEditable="false"
-          typeaheadWaitMs="200"
-          typeaheadTemplateUrl="staffAvatar"
-          typeaheadSelectOnExact="true"
-          (typeaheadOnSelect)="addSelectedStaff()"
-        />
+          (selectItem)="addSelectedStaff()"
+        /> -->
+        <mat-form-field appearance="outline" class="w-full">
+          <input
+            type="text"
+            matInput
+            [formControl]="tutorFormControl"
+            [matAutocomplete]="auto"
+            [(ngModel)]="selectedStaff"
+          />
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+            @for (tutor of filteredTutors | async; track tutor) {
+              <mat-option [value]="tutor"> {{ tutor.name }} </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
 
         <span class="input-group-btn">
-          <button class="btn btn-success pull-right" (click)="addSelectedStaff()">
-            <i class="fa fa-male"></i>
-            <i class="fa fa-plus"></i> Add Staff
+          <button mat-raised-button color="primary" (click)="addSelectedStaff()">
+            <mat-icon>person_add</mat-icon> Add Staff
           </button>
         </span>
       </div>
-    </div>
-  </div>
+    </mat-card-footer>
+  </mat-card>
 </div>
