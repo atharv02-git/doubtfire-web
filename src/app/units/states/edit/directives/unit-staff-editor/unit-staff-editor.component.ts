@@ -6,22 +6,22 @@ import {UnitRoleService} from 'src/app/api/services/unit-role.service';
 import {Unit} from 'src/app/api/models/unit';
 import {UnitRole} from 'src/app/api/models/unit-role';
 import {User, UserService} from 'src/app/api/models/doubtfire-model';
-import { FormControl } from '@angular/forms';
-import { Observable, startWith, map } from 'rxjs';
+import {FormControl} from '@angular/forms';
+import {Observable, startWith, map} from 'rxjs';
 
 @Component({
   selector: 'unit-staff-editor', // Define the component selector
   templateUrl: './unit-staff-editor.component.html', // Link to the HTML template
-  // styleUrls: ['./unit-staff-editor.component.scss'], // Link to the SCSS file for styles
+  styleUrls: ['./unit-staff-editor.component.scss'], // Link to the SCSS file for styles
 })
 export class UnitStaffEditorComponent implements OnInit {
   @Input() unit: Unit; // Input property to receive data from the parent component
   unitStaff: UnitRole[] = []; // Array to hold the staff members
   selectedStaff: User; // This is the staff member selected by the user to be added
 
-  public tutorFormControl: FormControl <string | User>
+  public tutorFormControl: FormControl<string | User>;
   public tutors: User[];
-  public filteredTutors: Observable<User[]>
+  public filteredTutors: Observable<User[]>;
 
   // Injecting services into the component through the constructor
   constructor(
@@ -41,8 +41,8 @@ export class UnitStaffEditorComponent implements OnInit {
     return this.tutors.filter(
       ({name, id}) =>
         name.toLowerCase().includes(filterValue) &&
-      !this.unitStaff.some((role) => role.user.id === id),
-    )
+        !this.unitStaff.some((role) => role.user.id === id),
+    );
   }
 
   // Lifecycle hook that runs when the component is initialized
@@ -52,19 +52,19 @@ export class UnitStaffEditorComponent implements OnInit {
       this.unitStaff = unitStaff;
     });
 
-    this.userService.getTutors().subscribe(tutors => {
-      this.tutors = tutors.filter((s) => ['Convenor', 'Admin', 'Tutor'].includes(s.systemRole))
-    })
+    this.userService.getTutors().subscribe((tutors) => {
+      this.tutors = tutors.filter((s) => ['Convenor', 'Admin', 'Tutor'].includes(s.systemRole));
+    });
 
-    this.tutorFormControl = new FormControl<string | User>('')
+    this.tutorFormControl = new FormControl<string | User>('');
 
     this.filteredTutors = this.tutorFormControl.valueChanges.pipe(
       startWith(''),
       map((value) => {
         const name = typeof value === 'string' ? value : value?.name;
         return name ? this._filter(name as string) : this.tutors;
-      })
-    )
+      }),
+    );
   }
 
   // Method to change the role of a staff member (e.g., Tutor or Convenor)
