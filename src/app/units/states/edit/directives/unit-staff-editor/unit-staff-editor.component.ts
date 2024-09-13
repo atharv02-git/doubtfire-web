@@ -23,6 +23,12 @@ export class UnitStaffEditorComponent implements OnInit {
   public tutors: User[];
   public filteredTutors: Observable<User[]>;
 
+  // ToDo: roleId is deprecated
+  public readonly ROLE_IDS = {
+    'Tutor': 2,
+    'Convenor': 3,
+  };
+
   // Injecting services into the component through the constructor
   constructor(
     private alertService: AlertService,
@@ -69,12 +75,23 @@ export class UnitStaffEditorComponent implements OnInit {
 
   // Method to change the role of a staff member (e.g., Tutor or Convenor)
   changeRole(unitRole: UnitRole, role: string): void {
+    const previouRole = unitRole.role;
+    const previousRoleId = unitRole.roleId;
+
     unitRole.role = role; // Update the roleId property of the unit role
+    unitRole.roleId = this.ROLE_IDS[role];
+
     this.newUnitRoleService.update(unitRole).subscribe({
       // On successful update, show a success alert
       next: () => this.alertService.success('Role changed', 2000),
       // On error, show an error alert
-      error: (response) => this.alertService.error(response, 6000),
+      error: (response) =>{
+        this.alertService.error(response, 6000),
+
+        // revert button state if failed to change
+        unitRole.role = previouRole;
+        unitRole.roleId = previousRoleId;
+      },
     });
   }
 
