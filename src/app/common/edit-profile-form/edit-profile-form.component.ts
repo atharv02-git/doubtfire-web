@@ -22,6 +22,7 @@ export class EditProfileFormComponent implements OnInit {
     private _snackBar: MatSnackBar
   ) {
     this.user = data?.user || this.userService.currentUser;
+    console.log('Initialized user:', this.user); // <-- Check if user object and user.id are properly initialized
   }
 
   /**
@@ -79,42 +80,39 @@ export class EditProfileFormComponent implements OnInit {
   }
 
   public submit(): void {
+    // Log the user object before making any backend request
+    console.log('Form input values:', this.user);
+
+    // Only proceed with backend request if needed
     this.user.pronouns = this.customPronouns ? this.user.pronouns : this.formPronouns.pronouns;
     this.user.hasRunFirstTimeSetup = true;
 
     if (this.newUser) {
+      console.log('Creating new user...');
+
+      // Create user if it's a new user
       this.userService.create(this.user).subscribe({
         next: (updatedUser) => {
+          console.log('User created:', updatedUser);
           this.user = updatedUser;
           this.initialFirstName = this.user.firstName;
-
-          this._snackBar.open('User created', 'dismiss', {
-            duration: 1500,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-          });
+          this._snackBar.open('User created', 'dismiss', { duration: 1500 });
         },
-        error: (error) => console.log(error),
+        error: (error) => console.log('Error creating user:', error),
       });
     } else {
+      console.log('Updating existing user...');
+      console.log('User ID:', this.user.id); // Log the user ID
+
+      // Update user if it's an existing user
       this.userService.update(this.user).subscribe({
         next: (updatedUser) => {
-          if (this.mode === 'create') {
-            this.state.go('home');
-          } else {
-            this.user = updatedUser;
-            this.initialFirstName = this.user.firstName;
-
-            // TODO: refactor into new alertService
-            // this is a new snackbar alert test
-            this._snackBar.open('Profile saved', 'dismiss', {
-              duration: 1500,
-              horizontalPosition: 'end',
-              verticalPosition: 'top',
-            });
-          }
+          console.log('User updated:', updatedUser);
+          this.user = updatedUser;
+          this.initialFirstName = this.user.firstName;
+          this._snackBar.open('Profile saved', 'dismiss', { duration: 1500 });
         },
-        error: (error) => console.log(error),
+        error: (error) => console.log('Error updating user:', error),
       });
     }
   }
