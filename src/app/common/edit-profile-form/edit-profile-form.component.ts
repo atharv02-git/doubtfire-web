@@ -1,11 +1,11 @@
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { StateService } from '@uirouter/core';
-import { User } from 'src/app/api/models/user/user';
-import { AuthenticationService } from 'src/app/api/services/authentication.service';
-import { UserService } from 'src/app/api/services/user.service';
-import { DoubtfireConstants } from 'src/app/config/constants/doubtfire-constants';
+import {Component, Inject, Input, OnInit, Optional} from '@angular/core';
+import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {StateService} from '@uirouter/core';
+import {User} from 'src/app/api/models/user/user';
+import {AuthenticationService} from 'src/app/api/services/authentication.service';
+import {UserService} from 'src/app/api/services/user.service';
+import {DoubtfireConstants} from 'src/app/config/constants/doubtfire-constants';
 
 @Component({
   selector: 'f-edit-profile-form',
@@ -18,8 +18,8 @@ export class EditProfileFormComponent implements OnInit {
     private userService: UserService,
     private state: StateService,
     private authService: AuthenticationService,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User; mode: 'edit' | 'create' | 'new' },
-    private _snackBar: MatSnackBar
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: {user: User; mode: 'edit' | 'create' | 'new'},
+    private _snackBar: MatSnackBar,
   ) {
     this.user = data?.user || this.userService.currentUser;
     console.log('Initialized user:', this.user); // <-- Check if user object and user.id are properly initialized
@@ -36,7 +36,7 @@ export class EditProfileFormComponent implements OnInit {
   public user: User;
   public externalName = this.constants.ExternalName;
   public initialFirstName: string;
-  public formPronouns = { pronouns: '' };
+  public formPronouns = {pronouns: ''};
   public get customPronouns(): boolean {
     return this.formPronouns.pronouns === '__customPronouns';
   }
@@ -96,7 +96,7 @@ export class EditProfileFormComponent implements OnInit {
           console.log('User created:', updatedUser);
           this.user = updatedUser;
           this.initialFirstName = this.user.firstName;
-          this._snackBar.open('User created', 'dismiss', { duration: 1500 });
+          this._snackBar.open('User created', 'dismiss', {duration: 1500});
         },
         error: (error) => console.log('Error creating user:', error),
       });
@@ -110,7 +110,7 @@ export class EditProfileFormComponent implements OnInit {
           console.log('User updated:', updatedUser);
           this.user = updatedUser;
           this.initialFirstName = this.user.firstName;
-          this._snackBar.open('Profile saved', 'dismiss', { duration: 1500 });
+          this._snackBar.open('Profile saved', 'dismiss', {duration: 1500});
         },
         error: (error) => console.log('Error updating user:', error),
       });
